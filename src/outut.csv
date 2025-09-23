@@ -1,0 +1,7 @@
+Algorithm,Data,Clusters,Iters,Runtime,Distances
+KMeans,sensor.csv,20,2,423,2340360
+Annulus,sensor.csv,20,91,6385,30645393
+Exponion,sensor.csv,20,91,8156,38308794
+GeoKmeans,sensor.csv,20,2,339,1268615
+Ball-KM,sensor.csv,20,2,2681,1661061
+Elkan,sensor.csv,20,84,2644,4010275
