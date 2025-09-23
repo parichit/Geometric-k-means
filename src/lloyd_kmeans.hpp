@@ -79,9 +79,8 @@ string init_type, Tint seed){
 
     result.loop_counter = loop_counter;
     result.num_dists = dist_counter;
-    // result.centroids = centroids;
+    result.centroids = centroids;
     // result.sse = get_sse(dataset, new_centroids, cluster_size, assigned_clusters, num_clusters);
-    // result.runtime = temptime.count();
 
     return result;
 

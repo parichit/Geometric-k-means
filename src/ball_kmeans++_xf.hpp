@@ -498,7 +498,7 @@ double thres= 0.001, int iters = 100, string init_type = "random", int seed=0) {
     
     result.loop_counter = iteration_counter;
     result.num_dists = cal_dist_num;
-    // result.ballkm_centroids = new_centroids;
+    result.ballkm_centroids = new_centroids;
     // result.sse = get_ballkm_sse(dataset, new_centroids, cluster_point_index, k);
 
     return result;

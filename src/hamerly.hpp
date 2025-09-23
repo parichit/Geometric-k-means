@@ -130,7 +130,7 @@ Tfloat threshold, Tint num_iterations, Tint numCols, string init_type, Tint seed
     
     result.loop_counter = loop_counter;
     result.num_dists = dist_counter;
-    // result.centroids = new_centroids;
+    result.centroids = new_centroids;
     // result.sse = get_sse(dataset, new_centroids, cluster_size, assigned_clusters, num_clusters);
     return result;
 }
