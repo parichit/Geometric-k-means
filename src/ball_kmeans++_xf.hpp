@@ -1,3 +1,9 @@
+/*
+Ball-k-means code is adapted from the following repository. 
+Changes are done (input and out data format, collection of statistics etc.) to ensure consistent comparison with other k-means variants.
+https://github.com/syxiaa/ball-k-means
+*/
+
 #include <iostream>
 #include <fstream>
 #include <time.h>

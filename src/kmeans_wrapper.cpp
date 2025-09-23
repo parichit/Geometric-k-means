@@ -22,6 +22,64 @@ std::string extractFilename(const std::string& path) {
     return std::filesystem::path(path).filename().string();
 }
 
+/*
+If you are using this code, please also cite the paper and give a star to our github repo. 
+It helps us to continue our open-source development for the community.
+
+@article{sharma2025geometrickmeansboundfreeapproach,
+      title={Geometric-k-means: A Bound Free Approach to Fast and Eco-Friendly k-means}, 
+      author={Parichit Sharma and Marcin Stanislaw and Hasan Kurban and Oguzhan Kulekci and Mehmet Dalkilic},
+      year={2025},
+      eprint={2508.06353},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2508.06353}, 
+}
+
+GitHub: https://github.com/parichit/Geometric-k-means
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+This is the wrapper script to run all the algorithms supported by this library. 
+The code below provides an example of how to call each of the algorithms.
+
+Use this library to access the C++ implementations of various K-means algorithms.
+
+The Python wrappers are available as pip pakage at: https://pypi.org/project/DataCentricKMeans/
+
+Currently supported algorithms include:
+Elkan, Hamelry, Annulus, Exponion, Geo-Kmeans, Ball K-means++ and Lloyd's K-means.
+Note that the Ball K-means++ implementation requires the header files from the Eigen library. We provide the library in the github repository. 
+
+For any questions, please contact: parishar@iu.edu
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+Parameters:
+1. filePath: absolute path to the input data file in csv format
+2. num_clusters: number of clusters (k)
+3. threshold: convergence threshold (e.g., 0.001)
+4. num_iterations: maximum number of iterations (e.g., 100)
+5. init_type: initialization type for centroids ("random" or absolute path to the file containing the centroids)
+6. seed: random seed for centroid initialization (e.g., 42)
+7. outPath: absolute path to the output file where results will be written 
+
+Example command to run the code:
+./kmeans_wrapper /path/to/data.csv 10 0.001 100 random 12 /path/to/output.csv
+
+or, with custom centroids:
+./kmeans_wrapper /path/to/data.csv 10 0.001 100 /path/to/centroids.csv 12 /path/to/output.csv
+
+How to compile the code (assuming all the files are in the src directory):
+g++ --std=c++17 -I"/path/to/eigen" kmeans_wrapper.cpp -o kmeans_wrapper
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+*/
+
+
 
 int main(int argc, char* argv[]){
 
@@ -33,14 +91,14 @@ int main(int argc, char* argv[]){
     float threshold = stof(argv[3]);
     int num_iterations = atoi(argv[4]);
     
-    // initialization types
+    // Initialization types
     // 1. "random": initialize the centroids randomly from the data 
     // 2. fileptath: absolute path to the file containing the centroids. 
     // The centroids can be extracted via any method, e.g. k++. This file 
     // should be in csv format with rows as centroids and columns as features.
     
-    string init_type = "random";
-    int seed = atoi(argv[5]);
+    string init_type = argv[5];
+    int seed = atoi(argv[6]);
 
 
     // A path where you want to write the results
@@ -76,7 +134,7 @@ int main(int argc, char* argv[]){
     // Extract filename from the given path for logging
     std::string data = extractFilename(filePath);
 
-    // Debug - Testing
+    // Calling the Lloyd's k-means
     cout << "\nAlgo: KMeans," << " Clusters: " << num_clusters << ", Threshold: " << threshold << endl;
     auto t1 = std::chrono::high_resolution_clock::now();
     res = lloyd_kmeans(dataset, num_clusters, threshold, num_iterations, numCols, init_type, seed);
@@ -90,6 +148,7 @@ int main(int argc, char* argv[]){
     resFile.close();
 
 
+    // Calling the Annulus k-means
     cout << "\nAlgo: Annulus," << " Clusters: " << num_clusters << ", Threshold: " << threshold << endl;
     auto t3 = std::chrono::high_resolution_clock::now();
     res = annulus(dataset, num_clusters, threshold, num_iterations, numCols, init_type, seed);
@@ -106,6 +165,7 @@ int main(int argc, char* argv[]){
     resFile.close();
 
 
+    // Calling the Exponion k-means
     cout << "\nAlgo: Exponion," << " Clusters: " << num_clusters << ", Threshold: " << threshold << endl;
     auto t5 = std::chrono::high_resolution_clock::now();
     res = exponion(dataset, num_clusters, threshold, num_iterations, numCols, init_type, seed);
@@ -122,6 +182,7 @@ int main(int argc, char* argv[]){
     resFile.close();
 
 
+    // Calling the Geo-k-means
     cout << "\nAlgo: Geo-Kmeans," << " Clusters: " << num_clusters << ", Threshold: " << threshold << endl;
     auto t7 = std::chrono::high_resolution_clock::now();
     res = geokmeans(dataset, num_clusters, threshold, num_iterations, numCols, init_type, seed);
@@ -136,6 +197,9 @@ int main(int argc, char* argv[]){
     ms_int3.count() << "," << res.num_dists << "\n";
     resFile.close();
 
+    
+    // Calling the Ball-k-means
+    // To run Ball-k-means: Make sure to include the Eigen library header files while compiling
     
     // Load data in Eigen format for Ball KMeans
     MatrixOur BallK_dataset = load_data(filePath);
@@ -155,6 +219,7 @@ int main(int argc, char* argv[]){
     resFile.close();
 
     
+    // Calling the Elkan's k-means
     cout << "\nAlgo: Elkan," << " Clusters: " << num_clusters << ", Threshold: " << threshold << endl;
     auto t11 = std::chrono::high_resolution_clock::now();
     res = elkan_kmeans(dataset, num_clusters, threshold, num_iterations, numCols, init_type, seed);
