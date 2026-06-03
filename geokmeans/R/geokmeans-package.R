@@ -9,7 +9,7 @@
 #' and the dispatcher [kmeans_dc()].
 #'
 #' @references
-#' Sharma, P., Stanislaw, M., Kurban, H., Kulekci, O., and Dalkilic, M. (2025).
+#' Sharma, P., Stanislaw, M., Kurban, H., Kulekci, O., and Dalkilic, M. (2026).
 #' Geometric-k-means: A Bound Free Approach to Fast and Eco-Friendly k-means.
 #' \doi{10.1007/s10994-025-06891-1}
 #'

@@ -16,7 +16,7 @@ The main entry points are \code{\link[=geo_kmeans]{geo_kmeans()}}, \code{\link[=
 and the dispatcher \code{\link[=kmeans_dc]{kmeans_dc()}}.
 }
 \references{
-Sharma, P., Stanislaw, M., Kurban, H., Kulekci, O., and Dalkilic, M. (2025).
+Sharma, P., Stanislaw, M., Kurban, H., Kulekci, O., and Dalkilic, M. (2026).
 Geometric-k-means: A Bound Free Approach to Fast and Eco-Friendly k-means.
 \doi{10.1007/s10994-025-06891-1}
 }
@@ -33,7 +33,7 @@ Useful links:
 
 Authors:
 \itemize{
-  \item Marcin Stanislaw
+  \item Marcin Malec
   \item Hasan Kurban
   \item Oguzhan Kulekci
   \item Mehmet Dalkilic
