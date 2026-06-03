@@ -5,11 +5,8 @@ Version: 0.1.0
 Authors@R: c(
     person("Parichit", "Sharma", email = "parishar@iu.edu",
            role = c("aut", "cre", "cph")),
-    person("Marcin", "Stanislaw", role = "aut"),
-    person("Hasan", "Kurban", role = "aut"),
-    person("Oguzhan", "Kulekci", role = "aut"),
-    person("Mehmet", "Dalkilic", role = "aut"))
-Description: Fast C++ implementations of several k-means clustering algorithms
+    person("Hasan", "Kurban", role = "aut"))
+Description: R package for fast C++ implementations of several k-means clustering algorithms
     under a uniform interface, including Lloyd's algorithm, Elkan, Hamerly,
     Annulus, Exponion, Ball k-means, and the bound-free Geometric-k-means
     method of Sharma et al. (2025) <doi:10.1007/s10994-025-06891-1>.
@@ -25,15 +22,12 @@ LinkingTo: Rcpp, RcppEigen
 SystemRequirements: C++17
 Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
-URL: https://github.com/parichit/Geometric-k-means
+URL: https://github.com/parichit/Geometric-k-means/geokmeans
 BugReports: https://github.com/parichit/Geometric-k-means/issues
 RoxygenNote: 7.3.1
 Roxygen: list(markdown = TRUE)
 NeedsCompilation: yes
 Packaged: 2026-06-03 00:41:36 UTC; root
 Author: Parichit Sharma [aut, cre, cph],
-  Marcin Stanislaw [aut],
-  Hasan Kurban [aut],
-  Oguzhan Kulekci [aut],
-  Mehmet Dalkilic [aut]
+  Hasan Kurban [aut]
 Maintainer: Parichit Sharma <parishar@iu.edu>
