@@ -17,8 +17,6 @@
 
 ### A bound-free approach to fast and eco-friendly *k*-means
 
-<img src="images/Figure.png" alt="Geometric-k-means concept: high- vs low-expressive data" width="420"/>
-
 <br/>
 
 [![DOI](https://img.shields.io/badge/DOI-10.1007%2Fs10994--025--06891--1-1f57b6.svg)](https://doi.org/10.1007/s10994-025-06891-1)
