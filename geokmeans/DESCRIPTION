@@ -4,11 +4,8 @@ Title: Fast and Eco-Friendly k-Means Clustering Algorithms
 Version: 0.1.0
 Authors@R: c(
     person("Parichit", "Sharma", email = "parishar@iu.edu",
-           role = c("aut", "cre", "cph")),
-    person("Marcin", "Malec", role = "aut"),
-    person("Hasan", "Kurban", role = "aut"),
-    person("Oguzhan", "Kulekci", role = "aut"),
-    person("Mehmet", "Dalkilic", role = "aut"))
+           role = c("aut", "cre", "
+    person("Hasan", "Kurban", role = "aut"))
 Description: Fast C++ implementations of several k-means clustering algorithms
     under a uniform interface, including Lloyd's algorithm, Elkan, Hamerly,
     Annulus, Exponion, Ball k-means, and the bound-free Geometric-k-means
@@ -33,8 +30,5 @@ Roxygen: list(markdown = TRUE)
 NeedsCompilation: yes
 Packaged: 2026-06-03 19:01:47 UTC; root
 Author: Parichit Sharma [aut, cre, cph],
-  Marcin Malec [aut],
-  Hasan Kurban [aut],
-  Oguzhan Kulekci [aut],
-  Mehmet Dalkilic [aut]
+  Hasan Kurban [aut]
 Maintainer: Parichit Sharma <parishar@iu.edu>
