@@ -1,4 +1,4 @@
-# geokmeans
+# R Package for Geometric-K-means (geo-k-means)
 
 Fast, eco-friendly k-means clustering for R. The package wraps high-performance
 C++ implementations of seven k-means variants behind a single, uniform R
