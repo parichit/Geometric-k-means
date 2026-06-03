@@ -1,0 +1,181 @@
+---
+title: "Getting started with geokmeans"
+author: "The geokmeans authors"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with geokmeans}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 6,
+  fig.height = 4
+)
+set.seed(1)
+```
+
+## Introduction
+
+**geokmeans** provides fast C++ implementations of several *k*-means clustering
+algorithms behind a single, uniform R interface. The headline method is
+**Geometric-*k*-means**, a bound-free algorithm that uses geometry (scalar
+projection) to focus distance computations only on the points that can actually
+change cluster membership, while skipping the rest. It returns the *same*
+clustering as Lloyd's *k*-means when initialized identically, but typically with
+far fewer distance computations, less memory, and lower energy use
+(Sharma et al., 2026, \doi{10.1007/s10994-025-06891-1}).
+
+The package exposes seven algorithms:
+
+| Function            | Algorithm            | Type        |
+|---------------------|----------------------|-------------|
+| `geo_kmeans()`      | Geometric-*k*-means  | bound-free  |
+| `ball_kmeans()`     | Ball *k*-means++     | bound-free  |
+| `lloyd_kmeans()`    | Lloyd's *k*-means    | baseline    |
+| `elkan_kmeans()`    | Elkan                | bounded     |
+| `hamerly_kmeans()`  | Hamerly              | bounded     |
+| `annulus_kmeans()`  | Annulus              | bounded     |
+| `exponion_kmeans()` | Exponion             | bounded     |
+
+All share the same interface and return value; they differ only in the
+acceleration strategy used internally.
+
+```{r library}
+library(geokmeans)
+```
+
+## A first clustering
+
+Every function takes a numeric matrix (observations in rows, features in
+columns) and `centers`, which is either the number of clusters or a matrix of
+initial centroids.
+
+```{r first}
+X <- rbind(
+  matrix(rnorm(200, mean = 0), ncol = 2),
+  matrix(rnorm(200, mean = 6), ncol = 2)
+)
+
+fit <- geo_kmeans(X, centers = 2)
+fit
+```
+
+The result is a `geokmeans` object: a list with the final centroids, the
+per-point cluster assignment, and computational statistics.
+
+```{r structure}
+str(fit)
+```
+
+```{r plot, fig.alt = "Two clusters coloured by assignment with centroids marked"}
+plot(X, col = fit$cluster, pch = 19, cex = 0.6,
+     xlab = "x1", ylab = "x2", main = "geo_kmeans result")
+points(fit$centroids, pch = 8, cex = 2, lwd = 2)
+```
+
+## Choosing an algorithm
+
+Because every variant returns the same partition (they are all exact), the
+choice is about speed, not quality. Call a function directly, or use the
+`kmeans_dc()` dispatcher with `method`:
+
+```{r dispatch}
+kmeans_dc(X, centers = 2, method = "elkan")$centroids
+```
+
+### Comparing distance computations
+
+The algorithms differ in how many point-to-centroid distances they compute. On
+the same data and seed, they reach the same solution with very different amounts
+of work:
+
+```{r compare}
+set.seed(42)
+Y <- do.call(rbind, lapply(seq_len(6), function(i)
+  matrix(rnorm(500, mean = 4 * i), ncol = 2)))
+
+methods <- c("lloyd", "hamerly", "annulus", "exponion",
+             "ball", "geokmeans")
+
+comparison <- data.frame(
+  method = methods,
+  distance_calcs = vapply(methods, function(m) {
+    kmeans_dc(Y, centers = 6, method = m, seed = 1)$distance_calculations
+  }, numeric(1)),
+  row.names = NULL
+)
+comparison[order(comparison$distance_calcs), ]
+```
+
+Lower is better. The relative savings grow with the number of observations and
+clusters.
+
+## Initialization and reproducibility
+
+For a numeric `centers`, the starting centroids are chosen by `init`:
+
+* `"random"` (default) -- random observations, drawn with R's RNG;
+* `"sequential"` -- the first `k` observations.
+
+Because initialization uses R's random number generator, results are
+reproducible. A non-`NULL` `seed` makes a call self-contained *and* leaves your
+session's RNG stream untouched afterwards; `seed = NULL` honours a preceding
+`set.seed()`.
+
+```{r seed}
+a <- geo_kmeans(X, centers = 2, seed = 7)
+b <- geo_kmeans(X, centers = 2, seed = 7)
+identical(a$centroids, b$centroids)
+```
+
+You can also supply your own starting centroids as a matrix (mirroring
+`stats::kmeans()`):
+
+```{r custom-init}
+init <- X[c(1, 101), ]
+geo_kmeans(X, centers = init)$centroids
+```
+
+## Working with the bundled data
+
+Two small datasets ship with the package under `extdata`:
+
+```{r realdata}
+path <- system.file("extdata", "Breastcancer.csv", package = "geokmeans")
+bc <- as.matrix(read.csv(path, header = FALSE))
+dim(bc)
+
+bc_fit <- geo_kmeans(bc, centers = 2, seed = 1)
+table(bc_fit$cluster)
+```
+
+## Safeguards for degenerate inputs
+
+You cannot form more non-empty clusters than there are distinct observations.
+Requesting too many is an error with an explanatory message:
+
+```{r toomany, error = TRUE}
+D <- rbind(matrix(0.1, 50, 2), matrix(9, 50, 2))  # only 2 distinct rows
+geo_kmeans(D, centers = 3)
+```
+
+If a run leaves a cluster empty, it is dropped by default and the labels are
+renumbered (`drop_empty = TRUE`); set `drop_empty = FALSE` to keep the requested
+number of centroids. Set `with_labels = FALSE` to skip computing per-point
+assignments when you only need the centroids.
+
+## Citation
+
+```{r cite, eval = FALSE}
+citation("geokmeans")
+```
+
+Please cite the paper:
+
+> Sharma, P., Malec, M., Kurban, H., Kulekci, O., & Dalkilic, M. (2026).
+> *Geometric-k-means: A Bound Free Approach to Fast and Eco-Friendly k-means.*
+> Machine Learning, 115(2), article 30. \doi{10.1007/s10994-025-06891-1}

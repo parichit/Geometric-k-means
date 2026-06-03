@@ -65,9 +65,11 @@ bc_fit <- geo_kmeans(bc, centers = 2, seed = 1)
 table(bc_fit$cluster)
 
 ## ----toomany, error = TRUE----------------------------------------------------
+try({
 D <- rbind(matrix(0.1, 50, 2), matrix(9, 50, 2))  # only 2 distinct rows
 geo_kmeans(D, centers = 3)
+})
 
 ## ----cite, eval = FALSE-------------------------------------------------------
-#  citation("geokmeans")
+# citation("geokmeans")
 

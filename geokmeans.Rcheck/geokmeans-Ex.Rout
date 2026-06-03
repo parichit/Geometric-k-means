@@ -1,0 +1,107 @@
+
+R version 4.4.2 (2024-10-31) -- "Pile of Leaves"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin20
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> pkgname <- "geokmeans"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> library('geokmeans')
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("kmeans_algorithms")
+> ### * kmeans_algorithms
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: kmeans_algorithms
+> ### Title: k-Means clustering algorithms
+> ### Aliases: kmeans_algorithms geo_kmeans lloyd_kmeans elkan_kmeans
+> ###   hamerly_kmeans annulus_kmeans exponion_kmeans ball_kmeans
+> 
+> ### ** Examples
+> 
+> set.seed(1)
+> X <- rbind(matrix(rnorm(100, 0), ncol = 2),
++            matrix(rnorm(100, 5), ncol = 2))
+> fit <- geo_kmeans(X, centers = 2)
+> fit$centroids
+          [,1]      [,2]
+[1,] 4.8475151 5.0768690
+[2,] 0.1004483 0.1173264
+> table(fit$cluster)
+
+ 1  2 
+50 50 
+> 
+> # Supplying explicit starting centroids:
+> geo_kmeans(X, centers = X[c(1, 51), ])
+k-means clustering (geokmeans) with 2 clusters
+Iterations: 2 | Distance computations: 301
+Cluster sizes: 50, 50
+Centroids:
+       [,1]   [,2]
+[1,] 0.1004 0.1173
+[2,] 4.8475 5.0769
+> 
+> 
+> 
+> 
+> cleanEx()
+> nameEx("kmeans_dc")
+> ### * kmeans_dc
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: kmeans_dc
+> ### Title: Run a k-means variant by name
+> ### Aliases: kmeans_dc
+> 
+> ### ** Examples
+> 
+> set.seed(1)
+> X <- rbind(matrix(rnorm(100, 0), ncol = 2),
++            matrix(rnorm(100, 5), ncol = 2))
+> kmeans_dc(X, centers = 2, method = "elkan")
+k-means clustering (elkan) with 2 clusters
+Iterations: 3 | Distance computations: 345
+Cluster sizes: 50, 50
+Centroids:
+       [,1]   [,2]
+[1,] 4.8475 5.0769
+[2,] 0.1004 0.1173
+> 
+> 
+> 
+> 
+> ### * <FOOTER>
+> ###
+> cleanEx()
+> options(digits = 7L)
+> base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+Time elapsed:  0.098 0.007 0.108 0 0 
+> grDevices::dev.off()
+null device 
+          1 
+> ###
+> ### Local variables: ***
+> ### mode: outline-minor ***
+> ### outline-regexp: "\\(> \\)?### [*]+" ***
+> ### End: ***
+> quit('no')
