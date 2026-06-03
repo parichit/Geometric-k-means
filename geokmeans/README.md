@@ -51,7 +51,7 @@ This repository provides both a **header-only C++ library** and an **R package**
 A point only needs a distance computation if it is **oriented toward a neighboring centroid** (HE). Points oriented back toward their own centroid (LE/LHE) keep their membership and are skipped.
 
 <div align="center">
-<img src="https://media.springernature.com/lw685/springer-static/image/art%3A10.1007%2Fs10994-025-06891-1/MediaObjects/10994_2025_6891_Fig4_HTML.png" alt="LHE vs HE illustration" width="560"/>
+<img src="../images/Figure.png" alt="LHE vs HE illustration" width="560"/>
 <br/>
 <sub><b>Only C and D are high-expressive (HE)</b> — the angle from the midpoint toward the neighbor centroid is &lt; 90°. A and B point back toward their own centroid and are treated as LE. <i>Figure from Sharma et al. (2026), Machine Learning (open access).</i></sub>
 </div>
@@ -183,7 +183,9 @@ If you use Geometric-*k*-means (the algorithm, the C++ code, or the R package) i
 > *Geometric-k-means: A Bound Free Approach to Fast and Eco-Friendly k-means.*
 > Machine Learning, 115(2), article 30. https://doi.org/10.1007/s10994-025-06891-1
 
-Read the paper: **[Machine Learning (Springer, open access)](https://doi.org/10.1007/s10994-025-06891-1)** · **[arXiv:2508.06353](https://arxiv.org/abs/2508.06353)**
+Read the paper: **[Machine Learning (Springer, open access)](https://doi.org/10.1007/s10994-025-06891-1)** · 
+
+Preprint: **[arXiv:2508.06353](https://arxiv.org/abs/2508.06353)**
 
 ## License
 
