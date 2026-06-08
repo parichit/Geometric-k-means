@@ -1,6 +1,6 @@
 Package: geokmeans
 Type: Package
-Title: Fast and Eco-Friendly k-Means Clustering Algorithms
+Title: A Collection of Fast and Eco-Friendly k-Means Clustering Algorithms
 Version: 0.1.0
 Authors@R: c(
     person("Parichit", "Sharma", email = "parishar@iu.edu", role = c("aut", "cre", "cph")),
