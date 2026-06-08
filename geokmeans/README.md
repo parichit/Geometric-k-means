@@ -174,7 +174,7 @@ Preprint: **[arXiv:2508.06353](https://arxiv.org/abs/2508.06353)**
 
 ## License
 
-Released under the **GPL-3** license. See [`LICENSE`](LICENSE).
+Released under the **GPL-3** license.
 
 <div align="center">
 <sub>Built at the Luddy School of Informatics, Computing &amp; Engineering, Indiana University.</sub>

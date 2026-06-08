@@ -5,15 +5,15 @@ Version: 0.1.0
 Authors@R: c(
     person("Parichit", "Sharma", email = "parishar@iu.edu", role = c("aut", "cre", "cph")),
     person("Hasan", "Kurban", role = "aut"))
-Description: Fast C++ implementations of several k-means clustering algorithms
-    under a uniform interface, including Lloyd's algorithm, Elkan, Hamerly,
-    Annulus, Exponion, Ball k-means, and the bound-free Geometric-k-means
-    method of Sharma et al. (2026) <doi:10.1007/s10994-025-06891-1>.
-    Geometric-k-means treats data points as first-class citizens to channel
-    computation toward high-expressive points, reducing distance computations,
-    memory use, and runtime while preserving cluster quality. The algorithms
-    are exposed to R via 'Rcpp' and 'RcppEigen' and return the final centroids,
-    optional per-point cluster assignments, and computational statistics.
+Description: Description: A collection of fast k-means clustering algorithms under a single,
+    uniform interface. The core method is Geometric-k-means, a bound-free
+    algorithm of Sharma et al. (2026) <doi:10.1007/s10994-025-06891-1> that uses
+    geometry to restrict computation to the data points able to change clusters,
+    substantially reducing distance computations and runtime while returning the
+    same result as standard k-means. Also included are Lloyd's algorithm, Elkan,
+    Hamerly, Annulus, Exponion, and Ball k-means. All algorithms are implemented
+    in C++ via 'Rcpp' and 'RcppEigen' and return the final centroids, optional
+    per-point cluster assignments, and computational statistics.
 License: GPL-3
 Encoding: UTF-8
 Imports: Rcpp

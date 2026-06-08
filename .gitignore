@@ -206,4 +206,15 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-*.DS_Store*
+.DS_Store
+.Rproj.user
+.Rbuildignore
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+*.rdx
+*.Rstudio
+*.Rproj
+
+
