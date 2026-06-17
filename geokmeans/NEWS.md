@@ -21,8 +21,7 @@
   a `print()` method.
 
 * Random initialisation uses R's random number generator and is reproducible via
-  `set.seed()` or the `seed` argument, without disturbing the caller's RNG
-  stream.
+  `set.seed()` or the optional `seed` argument (default `NULL`).
 
 * Safeguards for degenerate input: an informative error when more clusters are
   requested than there are distinct observations, and optional removal of empty

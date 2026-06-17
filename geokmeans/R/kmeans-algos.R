@@ -58,19 +58,12 @@
       res$k, n_distinct, n_distinct, res$k), call. = FALSE)
   }
 
-  # Random initialisation draws from R's RNG. A non-NULL 'seed' makes results
-  # reproducible while leaving the caller's RNG stream untouched on return;
-  # 'seed = NULL' uses the ambient RNG (i.e. honours a prior set.seed()).
-  if (!is.null(seed)) {
-    genv <- globalenv()
-    if (exists(".Random.seed", envir = genv, inherits = FALSE)) {
-      old_seed <- get(".Random.seed", envir = genv, inherits = FALSE)
-      on.exit(assign(".Random.seed", old_seed, envir = genv), add = TRUE)
-    } else {
-      on.exit(suppressWarnings(rm(".Random.seed", envir = genv)), add = TRUE)
-    }
-    set.seed(as.integer(seed))
-  }
+  # Random initialisation draws from R's RNG (the C++ routines consume it via
+  # unif_rand()). Supplying a non-NULL 'seed' makes the initialisation, and
+  # hence the result, reproducible. With the default 'seed = NULL' nothing is
+  # set, so the ambient RNG is used and a preceding set.seed() in the caller's
+  # session is honoured.
+  if (!is.null(seed)) set.seed(as.integer(seed))
 
   seed_arg <- if (is.null(seed)) 0L else as.integer(seed)
   call_cpp <- function()
@@ -130,10 +123,11 @@
 #' @param init Initialisation strategy when `centers` is a number: `"random"`
 #'   (random observations) or `"sequential"` (the first `k` observations).
 #'   Ignored when `centers` is a matrix.
-#' @param seed Integer seed for the random initialisation, or `NULL`.
-#'   Initialisation uses R's random number generator: a non-`NULL` `seed` gives
-#'   reproducible results (and the caller's RNG stream is restored afterwards),
-#'   while `NULL` uses the ambient RNG so a preceding [set.seed()] applies.
+#' @param seed Optional integer seed for the random initialisation, or `NULL`
+#'   (the default). Initialisation uses R's random number generator: supplying a
+#'   seed sets it via [set.seed()] so the result is reproducible, while `NULL`
+#'   leaves the RNG untouched, so the ambient stream (e.g. a preceding
+#'   [set.seed()] in your session) is honoured.
 #' @param with_labels Logical; if `TRUE` (default) the result includes a
 #'   per-observation cluster assignment computed from the final centroids.
 #' @param verbose Logical; if `TRUE`, print the algorithm's convergence message.
@@ -176,7 +170,7 @@ NULL
 #' @rdname kmeans_algorithms
 #' @export
 geo_kmeans <- function(data, centers, iter_max = 100L, threshold = 1e-3,
-                       init = c("random", "sequential"), seed = 0L,
+                       init = c("random", "sequential"), seed = NULL,
                        with_labels = TRUE, verbose = FALSE, drop_empty = TRUE) {
   .run_kmeans(cpp_geo_kmeans, "geokmeans", data, centers, iter_max, threshold,
               init, seed, with_labels, verbose, drop_empty)
@@ -185,7 +179,7 @@ geo_kmeans <- function(data, centers, iter_max = 100L, threshold = 1e-3,
 #' @rdname kmeans_algorithms
 #' @export
 lloyd_kmeans <- function(data, centers, iter_max = 100L, threshold = 1e-3,
-                         init = c("random", "sequential"), seed = 0L,
+                         init = c("random", "sequential"), seed = NULL,
                          with_labels = TRUE, verbose = FALSE, drop_empty = TRUE) {
   .run_kmeans(cpp_lloyd_kmeans, "lloyd", data, centers, iter_max, threshold,
               init, seed, with_labels, verbose, drop_empty)
@@ -194,7 +188,7 @@ lloyd_kmeans <- function(data, centers, iter_max = 100L, threshold = 1e-3,
 #' @rdname kmeans_algorithms
 #' @export
 elkan_kmeans <- function(data, centers, iter_max = 100L, threshold = 1e-3,
-                         init = c("random", "sequential"), seed = 0L,
+                         init = c("random", "sequential"), seed = NULL,
                          with_labels = TRUE, verbose = FALSE, drop_empty = TRUE) {
   .run_kmeans(cpp_elkan_kmeans, "elkan", data, centers, iter_max, threshold,
               init, seed, with_labels, verbose, drop_empty)
@@ -203,7 +197,7 @@ elkan_kmeans <- function(data, centers, iter_max = 100L, threshold = 1e-3,
 #' @rdname kmeans_algorithms
 #' @export
 hamerly_kmeans <- function(data, centers, iter_max = 100L, threshold = 1e-3,
-                           init = c("random", "sequential"), seed = 0L,
+                           init = c("random", "sequential"), seed = NULL,
                            with_labels = TRUE, verbose = FALSE, drop_empty = TRUE) {
   .run_kmeans(cpp_hamerly_kmeans, "hamerly", data, centers, iter_max, threshold,
               init, seed, with_labels, verbose, drop_empty)
@@ -212,7 +206,7 @@ hamerly_kmeans <- function(data, centers, iter_max = 100L, threshold = 1e-3,
 #' @rdname kmeans_algorithms
 #' @export
 annulus_kmeans <- function(data, centers, iter_max = 100L, threshold = 1e-3,
-                           init = c("random", "sequential"), seed = 0L,
+                           init = c("random", "sequential"), seed = NULL,
                            with_labels = TRUE, verbose = FALSE, drop_empty = TRUE) {
   .run_kmeans(cpp_annulus_kmeans, "annulus", data, centers, iter_max, threshold,
               init, seed, with_labels, verbose, drop_empty)
@@ -221,7 +215,7 @@ annulus_kmeans <- function(data, centers, iter_max = 100L, threshold = 1e-3,
 #' @rdname kmeans_algorithms
 #' @export
 exponion_kmeans <- function(data, centers, iter_max = 100L, threshold = 1e-3,
-                            init = c("random", "sequential"), seed = 0L,
+                            init = c("random", "sequential"), seed = NULL,
                             with_labels = TRUE, verbose = FALSE, drop_empty = TRUE) {
   .run_kmeans(cpp_exponion_kmeans, "exponion", data, centers, iter_max,
               threshold, init, seed, with_labels, verbose, drop_empty)
@@ -230,7 +224,7 @@ exponion_kmeans <- function(data, centers, iter_max = 100L, threshold = 1e-3,
 #' @rdname kmeans_algorithms
 #' @export
 ball_kmeans <- function(data, centers, iter_max = 100L, threshold = 1e-3,
-                        init = c("random", "sequential"), seed = 0L,
+                        init = c("random", "sequential"), seed = NULL,
                         with_labels = TRUE, verbose = FALSE, drop_empty = TRUE) {
   .run_kmeans(cpp_ball_kmeans, "ball", data, centers, iter_max, threshold,
               init, seed, with_labels, verbose, drop_empty)

@@ -89,7 +89,7 @@ Every function shares the same signature:
 geo_kmeans(data, centers,
            iter_max = 100, threshold = 1e-3,
            init = c("random", "sequential"),
-           seed = 0, with_labels = TRUE,
+           seed = NULL, with_labels = TRUE,
            drop_empty = TRUE, verbose = FALSE)
 ```
 

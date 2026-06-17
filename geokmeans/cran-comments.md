@@ -6,6 +6,19 @@ Geometric-k-means method of Sharma et al., 2026,
 <doi:10.1007/s10994-025-06891-1>) behind a uniform R interface, via 'Rcpp' and
 'RcppEigen'.
 
+## Resubmission
+
+This is a resubmission addressing the points raised in the previous review:
+
+* Removed the duplicated `Description:` label at the start of the `Description`
+  field in DESCRIPTION.
+* Wrapped the software name `C++` in single quotes in the `Description` field
+  (`'Rcpp'` and `'RcppEigen'` were already quoted).
+* No longer modify the global environment (`.GlobalEnv`): `R/kmeans-algos.R` no
+  longer reads, assigns, or removes `.Random.seed` in `globalenv()`. The `seed`
+  argument now defaults to `NULL` and only calls `set.seed()` when the user
+  supplies a seed, leaving the RNG untouched otherwise.
+
 ## Test environments
 
 * local macOS, R release

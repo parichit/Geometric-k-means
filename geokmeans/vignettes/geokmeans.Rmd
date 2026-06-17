@@ -122,9 +122,9 @@ For a numeric `centers`, the starting centroids are chosen by `init`:
 * `"sequential"` -- the first `k` observations.
 
 Because initialization uses R's random number generator, results are
-reproducible. A non-`NULL` `seed` makes a call self-contained *and* leaves your
-session's RNG stream untouched afterwards; `seed = NULL` honours a preceding
-`set.seed()`.
+reproducible. Passing a non-`NULL` `seed` calls `set.seed()` internally so a
+call is self-contained and repeatable; the default `seed = NULL` leaves the RNG
+untouched and honours a preceding `set.seed()`.
 
 ```{r seed}
 a <- geo_kmeans(X, centers = 2, seed = 7)

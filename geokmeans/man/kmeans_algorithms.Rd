@@ -17,7 +17,7 @@ geo_kmeans(
   iter_max = 100L,
   threshold = 0.001,
   init = c("random", "sequential"),
-  seed = 0L,
+  seed = NULL,
   with_labels = TRUE,
   verbose = FALSE,
   drop_empty = TRUE
@@ -29,7 +29,7 @@ lloyd_kmeans(
   iter_max = 100L,
   threshold = 0.001,
   init = c("random", "sequential"),
-  seed = 0L,
+  seed = NULL,
   with_labels = TRUE,
   verbose = FALSE,
   drop_empty = TRUE
@@ -41,7 +41,7 @@ elkan_kmeans(
   iter_max = 100L,
   threshold = 0.001,
   init = c("random", "sequential"),
-  seed = 0L,
+  seed = NULL,
   with_labels = TRUE,
   verbose = FALSE,
   drop_empty = TRUE
@@ -53,7 +53,7 @@ hamerly_kmeans(
   iter_max = 100L,
   threshold = 0.001,
   init = c("random", "sequential"),
-  seed = 0L,
+  seed = NULL,
   with_labels = TRUE,
   verbose = FALSE,
   drop_empty = TRUE
@@ -65,7 +65,7 @@ annulus_kmeans(
   iter_max = 100L,
   threshold = 0.001,
   init = c("random", "sequential"),
-  seed = 0L,
+  seed = NULL,
   with_labels = TRUE,
   verbose = FALSE,
   drop_empty = TRUE
@@ -77,7 +77,7 @@ exponion_kmeans(
   iter_max = 100L,
   threshold = 0.001,
   init = c("random", "sequential"),
-  seed = 0L,
+  seed = NULL,
   with_labels = TRUE,
   verbose = FALSE,
   drop_empty = TRUE
@@ -89,7 +89,7 @@ ball_kmeans(
   iter_max = 100L,
   threshold = 0.001,
   init = c("random", "sequential"),
-  seed = 0L,
+  seed = NULL,
   with_labels = TRUE,
   verbose = FALSE,
   drop_empty = TRUE
@@ -111,10 +111,11 @@ with \code{ncol(centers) == ncol(data)}).}
 (random observations) or \code{"sequential"} (the first \code{k} observations).
 Ignored when \code{centers} is a matrix.}
 
-\item{seed}{Integer seed for the random initialisation, or \code{NULL}.
-Initialisation uses R's random number generator: a non-\code{NULL} \code{seed} gives
-reproducible results (and the caller's RNG stream is restored afterwards),
-while \code{NULL} uses the ambient RNG so a preceding \code{\link[=set.seed]{set.seed()}} applies.}
+\item{seed}{Optional integer seed for the random initialisation, or \code{NULL}
+(the default). Initialisation uses R's random number generator: supplying a
+seed sets it via \code{\link[=set.seed]{set.seed()}} so the result is reproducible, while \code{NULL}
+leaves the RNG untouched, so the ambient stream (e.g. a preceding
+\code{\link[=set.seed]{set.seed()}} in your session) is honoured.}
 
 \item{with_labels}{Logical; if \code{TRUE} (default) the result includes a
 per-observation cluster assignment computed from the final centroids.}
