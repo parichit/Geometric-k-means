@@ -37,6 +37,8 @@ A Python implementation is available at:
 
 Python source code is located at: __geokmeans-py__
 
+[python quick start guide](https://parichit.github.io/Geometric-k-means/quickstart.html)
+
 
 ### R API (available on CRAN)
 
@@ -44,7 +46,9 @@ The R version is available as a CRAN package at:
 
 [R package](https://cran.r-project.org/web/packages/geokmeans/index.html)
 
-R source code are located at: __geokmeans__
+R source code is present inside the folder: __geokmeans__
+
+[R quick start guide](https://cran.r-project.org/web/packages/geokmeans/vignettes/geokmeans.html)
 
 
 ### Contact
