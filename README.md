@@ -29,6 +29,30 @@ Please cite our work as follows. It helps us to keep contributing to the open-so
 }
 ```
 
+### Python Package (install via pypi)
+
+A Python implementation is available at: 
+
+[Python package](https://pypi.org/project/geokmeans/)
+
+Python source code is located at: __geokmeans-py__
+
+
+### R API (available on CRAN)
+
+The R version is available as a CRAN package at: 
+
+[R package](https://cran.r-project.org/web/packages/geokmeans/index.html)
+
+R source code are located at: __geokmeans__
+
+
+### Contact
+
+*For any Bug Fixes/Feature Update(s), please contant*
+
+Parichit Sharma: parishar@iu.edu
+
 
 ### Library overview
 
@@ -46,20 +70,6 @@ We have tested the library with both real and simulated datasets. Sample dataset
 - Breastcancer.csv
 - CreditRisk.csv
 - sensor.csv
-
-
-### Python Bindings
-
-Implementation of all the algorithms are also available as Python wrappers at the following Pip package.
-
-[Python Wrapper](https://pypi.org/project/DataCentricKMeans/)
-
-
-### Contact
-
-*For any Bug Fixes/Feature Update(s), please contant*
-
-Parichit Sharma: parishar@iu.edu
 
 
 ### Data Format
