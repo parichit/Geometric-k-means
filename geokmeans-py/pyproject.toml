@@ -4,14 +4,16 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "geokmeans"
-version = "0.1.0"
+version = "0.1.1"
 description = "Fast, eco-friendly k-means clustering (Geometric-k-means and six other accelerated variants), with a scikit-learn-style API."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { file = "LICENSE" }
 authors = [
     { name = "Parichit Sharma", email = "parishar@iu.edu" },
-    { name = "Hasan Kurban" },
+]
+maintainers = [
+    { name = "Parichit Sharma", email = "parishar@iu.edu" },
 ]
 keywords = ["k-means", "clustering", "machine-learning", "unsupervised", "geometric-k-means"]
 classifiers = [

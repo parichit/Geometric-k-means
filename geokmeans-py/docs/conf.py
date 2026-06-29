@@ -2,7 +2,7 @@
 import importlib.metadata
 
 project = "geokmeans"
-author = "Parichit Sharma, Hasan Kurban"
+author = "Parichit Sharma"
 copyright = "2026, Parichit Sharma"
 
 try:
