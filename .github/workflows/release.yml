@@ -1,0 +1,65 @@
+name: release
+
+# Build wheels for all platforms + an sdist, then publish to PyPI.
+# Triggered by pushing a version tag, e.g.  git tag v0.1.0 && git push origin v0.1.0
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:        # allows a manual run (builds only; no publish)
+
+jobs:
+  wheels:
+    name: wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      # Vendor the C++ sources into geokmeans-py/src/geokmeans/_cpp on the host
+      # BEFORE cibuildwheel runs (it needs ../src and ../eigen, which only exist
+      # at the repo root, not inside the build container).
+      - name: Vendor C++ sources
+        run: python geokmeans-py/sync_sources.py
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.21
+        with:
+          package-dir: geokmeans-py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: ./wheelhouse/*.whl
+
+  sdist:
+    name: sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vendor C++ sources
+        run: python geokmeans-py/sync_sources.py
+      - name: Build sdist
+        run: pipx run build --sdist geokmeans-py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: geokmeans-py/dist/*.tar.gz
+
+  publish:
+    name: publish to PyPI
+    needs: [wheels, sdist]
+    runs-on: ubuntu-latest
+    # Only publish on a tag push, not on manual/dispatch test runs.
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    environment: pypi
+    permissions:
+      id-token: write        # required for Trusted Publishing (OIDC)
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@release/v1
