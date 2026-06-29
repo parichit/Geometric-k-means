@@ -1,0 +1,58 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "pybind11>=2.12"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "geokmeans"
+version = "0.1.0"
+description = "Fast, eco-friendly k-means clustering (Geometric-k-means and six other accelerated variants), with a scikit-learn-style API."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Parichit Sharma", email = "parishar@iu.edu" },
+    { name = "Hasan Kurban" },
+]
+keywords = ["k-means", "clustering", "machine-learning", "unsupervised", "geometric-k-means"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = ["numpy>=1.21"]
+
+[project.urls]
+Homepage = "https://github.com/parichit/Geometric-k-means"
+Documentation = "https://parichit.github.io/Geometric-k-means/"
+Repository = "https://github.com/parichit/Geometric-k-means"
+"Bug Tracker" = "https://github.com/parichit/Geometric-k-means/issues"
+
+[project.optional-dependencies]
+test = ["pytest>=7", "scikit-learn>=1.0"]
+docs = ["sphinx>=7", "furo", "numpydoc", "sphinx-gallery", "matplotlib", "scikit-learn"]
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+wheel.packages = ["src/geokmeans"]
+# Vendored C++ sources are required in the sdist so source installs work.
+sdist.include = ["src/geokmeans/_cpp/**"]
+sdist.exclude = ["**/__pycache__", "**/*.so", "**/*.pyd"]
+
+[tool.cibuildwheel]
+build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
+skip = "*-musllinux_i686 *_i686 pp*"
+build-frontend = "build"
+test-requires = ["pytest", "scikit-learn"]
+test-command = "pytest {project}/tests"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
