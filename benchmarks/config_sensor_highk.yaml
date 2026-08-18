@@ -1,0 +1,73 @@
+# Sensor-only sweep at high k, 5 trials per configuration.
+# geokmeans algorithms only -- scikit-learn Lloyd is deliberately absent: its
+# float64 core cannot be made to agree with the float32 geokmeans core to
+# better than ~2.4e-08 relative, so it is not a meaningful exactness reference.
+# Every ratio here is therefore a within-library exactness measure.
+#
+# Run:
+#   .venv/bin/python scripts/run.py --config config_sensor_highk.yaml --experiment all
+#   .venv/bin/python scripts/report.py --config config_sensor_highk.yaml
+
+datasets:
+  - name: sensor
+    path: data/sensor.csv
+
+k_values: [50, 80, 100]
+
+implementations:
+  geokmeans:
+    - lloyd
+    - hamerly
+    - annulus
+    - exponion
+    - geo
+
+controls:
+  threads: 1
+  trials_per_config: 5
+  warmup_trials: 1
+  aggregate: median
+  tol: 1.0e-4
+  max_iter: 300
+  sse_reference: geokmeans_lloyd
+
+exactness_check:
+  k_values: [50, 80, 100]
+  seeds: [0, 1, 2, 3, 4]
+  reference: geokmeans_lloyd
+
+outputs:
+  - id: table1_main
+    type: latex_table
+    dataset: sensor
+    k: 50
+    columns:
+      - n_distance_calculations
+      - sse_ratio_vs_lloyd
+      - n_iterations
+      - wall_clock_seconds
+    rows:
+      - geokmeans_lloyd
+      - geokmeans_hamerly
+      - geokmeans_annulus
+      - geokmeans_exponion
+      - geokmeans_geo
+    output_path: results/tables/sensor_highk_main.tex
+
+  - id: appendix_full_matrix
+    type: latex_table
+    datasets: all
+    k_values: all
+    columns:
+      - n_distance_calculations
+      - sse_ratio_vs_lloyd
+      - n_iterations
+      - wall_clock_seconds
+    output_path: results/tables/sensor_highk_matrix.tex
+
+  - id: exactness_report
+    type: markdown_report
+    contents:
+      - ari_vs_lloyd
+      - max_relative_sse_deviation
+    output_path: results/reports/sensor_highk_exactness.md

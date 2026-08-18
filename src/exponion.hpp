@@ -46,6 +46,13 @@ inline output_data exponion(vector<vector <Tfloat> > &dataset,
     
 
     Tint loop_counter = 0;
+    // `new_centroids` is the freshly computed set; `centroids` is the last
+    // saved copy. Which one is final depends on how the loop exits, so track
+    // it. Previously lloyd returned `centroids` unconditionally (one iteration
+    // stale whenever it converged) while exponion/geokmeans returned
+    // `new_centroids` unconditionally (the zeroed accumulator whenever they
+    // ran out of iterations).
+    bool converged = false;
     vector<vector<Tfloat> > centroids(num_clusters, vector<Tfloat>(numCols, 0));
     vector<vector<Tfloat> > new_centroids(num_clusters, vector<Tfloat>(numCols, 0));
     vector<Tint> assigned_clusters(dataset.size(), 0);
@@ -179,6 +186,7 @@ inline output_data exponion(vector<vector <Tfloat> > &dataset,
         // Check Convergence
         if (alg_utils.check_convergence_ub_lb(centroid_motion, threshold, diff, temp_diff, i, j)){
             cout << "Convergence at iteration: " << loop_counter << "\n";
+            converged = true;
             break;
         }
 
@@ -194,7 +202,7 @@ inline output_data exponion(vector<vector <Tfloat> > &dataset,
     
     result.loop_counter = loop_counter;
     result.num_dists = dist_counter;
-    result.centroids = new_centroids;
+    result.centroids = converged ? new_centroids : centroids;
     // result.sse = get_sse(dataset, new_centroids, cluster_size, assigned_clusters, num_clusters);
     return result;
     

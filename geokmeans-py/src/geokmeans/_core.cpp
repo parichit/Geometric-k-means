@@ -32,6 +32,7 @@
 #include <tuple>
 #include <chrono>
 #include <fstream>
+#include <iomanip>
 #include <sstream>
 #include <cmath>
 #include <cfloat>
@@ -166,17 +167,112 @@ assign_labels(const py::array_t<double, py::array::c_style | py::array::forcecas
   return labels;
 }
 
+// --------------------------------------------------------------- init file
+
+// Removes the temporary init-centroid file on every exit path, including the
+// exceptional ones (the previous code only cleaned up on success).
+struct TempInitFile {
+  std::string path;
+  ~TempInitFile() { if (!path.empty()) std::remove(path.c_str()); }
+};
+
+// Cheap structural check on a centroid file: the C++ reader reports a bad path
+// only via `cout`, which this module redirects to a null sink, so a missing or
+// malformed file would otherwise leave the centroids silently zero-filled.
+static void validate_init_file(const std::string &path, int num_clusters, int n_cols) {
+  std::ifstream f(path);
+  if (!f.is_open())
+    throw std::invalid_argument("init file could not be opened: " + path);
+
+  std::string line;
+  int rows = 0;
+  while (std::getline(f, line)) {
+    if (line.find_first_not_of(" \t\r\n") == std::string::npos) continue;
+    if (rows == 0) {
+      const int cols = 1 + static_cast<int>(std::count(line.begin(), line.end(), ','));
+      if (cols != n_cols)
+        throw std::invalid_argument(
+            "init file has " + std::to_string(cols) + " columns, expected " +
+            std::to_string(n_cols) + ": " + path);
+    }
+    ++rows;
+  }
+  if (rows < num_clusters)
+    throw std::invalid_argument(
+        "init file has " + std::to_string(rows) + " rows, expected at least " +
+        std::to_string(num_clusters) + ": " + path);
+}
+
 // ------------------------------------------------------------------ dispatch
 
 static py::dict run_algorithm(const std::string &algo,
                               py::array_t<double, py::array::c_style | py::array::forcecast> data,
                               int num_clusters, double threshold,
-                              int num_iterations, int seed, bool verbose) {
+                              int num_iterations, int seed, bool verbose,
+                              py::object init_centroids) {
   auto buf = data.request();
   if (buf.ndim != 2)
     throw std::invalid_argument("data must be a 2-D array (n_samples x n_features)");
   const int n_cols = static_cast<int>(buf.shape[1]);
-  const std::string init_type = "random";
+
+  // Initialisation. Three routes:
+  //   * none            -> "random", the library's own sampling
+  //   * str / PathLike  -> the path is handed straight to the C++ reader. No
+  //                        file is written here, so a caller timing fit() does
+  //                        not pay for serialising centroids it already has.
+  //   * (k x d) array   -> written to a real temporary file at full precision.
+  std::string init_type = "random";
+  TempInitFile temp_init;
+
+  if (!init_centroids.is_none()) {
+    const bool is_path = py::isinstance<py::str>(init_centroids) ||
+                         py::hasattr(init_centroids, "__fspath__");
+
+    if (is_path) {
+      init_type = py::module_::import("os").attr("fspath")(init_centroids).cast<std::string>();
+      validate_init_file(init_type, num_clusters, n_cols);
+    } else {
+      auto init_arr = init_centroids.cast<py::array_t<double, py::array::c_style | py::array::forcecast> >();
+      auto init_buf = init_arr.request();
+      if (init_buf.ndim != 2)
+        throw std::invalid_argument("init must be a 2-D array (k x d)");
+      if (init_buf.shape[0] != num_clusters)
+        throw std::invalid_argument("init must have k rows (num_clusters)");
+      if (init_buf.shape[1] != n_cols)
+        throw std::invalid_argument("init must have d columns (n_features)");
+
+      // A genuine temp file. The previous code derived a directory from
+      // __FILE__, which is the build machine's source path baked in at compile
+      // time and need not exist on the machine running the wheel.
+      py::tuple fd_path = py::module_::import("tempfile").attr("mkstemp")(
+          py::arg("suffix") = ".csv", py::arg("prefix") = "geokmeans_init_");
+      py::module_::import("os").attr("close")(fd_path[0]);
+      temp_init.path = fd_path[1].cast<std::string>();
+
+      std::ofstream out(temp_init.path);
+      if (!out.is_open())
+        throw std::runtime_error("failed to open temp file: " + temp_init.path);
+
+      // Default ostream precision is 6 significant digits, which silently
+      // truncated the caller's centroids: callers asking two implementations to
+      // start from identical points did not actually get identical points.
+      out << std::scientific << std::setprecision(17);
+
+      const double *init_ptr = static_cast<double *>(init_buf.ptr);
+      for (ssize_t i = 0; i < init_buf.shape[0]; ++i) {
+        for (ssize_t j = 0; j < init_buf.shape[1]; ++j) {
+          if (j > 0) out << ",";
+          out << init_ptr[i * init_buf.shape[1] + j];
+        }
+        out << "\n";
+      }
+      out.close();
+      if (!out)
+        throw std::runtime_error("failed to write temp file: " + temp_init.path);
+
+      init_type = temp_init.path;
+    }
+  }
 
   output_data r;
   std::ostringstream captured;
@@ -240,8 +336,11 @@ PYBIND11_MODULE(_core, m) {
         py::arg("algorithm"), py::arg("data"), py::arg("num_clusters"),
         py::arg("threshold"), py::arg("num_iterations"), py::arg("seed"),
         py::arg("verbose") = false,
+        py::arg("init") = py::none(),
         "Run one k-means variant and return a dict with centroids, labels, "
-        "n_iter and distance_calculations.");
+        "n_iter and distance_calculations. "
+        "init: optional (k x d) array of initial centroids, or a path to a "
+        "CSV file holding them.");
   m.attr("ALGORITHMS") = py::make_tuple(
       "geo", "lloyd", "elkan", "hamerly", "annulus", "exponion", "ball");
 }

@@ -24,6 +24,13 @@ Tint num_clusters, Tfloat threshold, Tint num_iterations, Tint numCols,
 string init_type, Tint seed){
 
     Tint loop_counter = 0;
+    // `new_centroids` is the freshly computed set; `centroids` is the last
+    // saved copy. Which one is final depends on how the loop exits, so track
+    // it. Previously lloyd returned `centroids` unconditionally (one iteration
+    // stale whenever it converged) while exponion/geokmeans returned
+    // `new_centroids` unconditionally (the zeroed accumulator whenever they
+    // ran out of iterations).
+    bool converged = false;
     vector<vector<Tfloat> > centroids(num_clusters, vector<Tfloat>(numCols, 0));
     vector<vector<Tfloat> > new_centroids(num_clusters, vector<Tfloat>(numCols, 0));
     vector<vector <Tfloat> > dist_matrix(dataset.size(), vector<Tfloat>(num_clusters));
@@ -62,6 +69,7 @@ string init_type, Tint seed){
         // Check Convergence
         if (alg_utils.check_convergence(new_centroids, centroids, threshold, diff, temp_diff, i, j)){
                 cout << "Convergence at iteration: " << loop_counter << "\n";
+                converged = true;
                 break;
         }
 
@@ -79,7 +87,7 @@ string init_type, Tint seed){
 
     result.loop_counter = loop_counter;
     result.num_dists = dist_counter;
-    result.centroids = centroids;
+    result.centroids = converged ? new_centroids : centroids;
     // result.sse = get_sse(dataset, new_centroids, cluster_size, assigned_clusters, num_clusters);
 
     return result;

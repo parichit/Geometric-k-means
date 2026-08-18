@@ -94,9 +94,10 @@ MatrixOur&centroids, float threshold){
     if (new_centroids.rows() == centroids.rows()){
         
         for (i=0; i<new_centroids.rows(); i++){
-            for (j=0; j<new_centroids.cols(); j++)
+            for (j=0; j<new_centroids.cols(); j++){
                 temp_diff = new_centroids(i, j) - centroids(i, j);
                 diff = diff + (temp_diff * temp_diff);
+            }
         }
         diff = sqrt(diff/new_centroids.rows());
     }

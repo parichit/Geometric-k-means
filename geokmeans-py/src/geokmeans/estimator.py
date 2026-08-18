@@ -1,6 +1,7 @@
 """scikit-learn-style estimator for the Geometric-k-means family."""
 from __future__ import annotations
 
+import os
 from typing import Optional, Union
 
 import numpy as np
@@ -39,12 +40,20 @@ class GeoKMeans:
     algorithm : str, default="geo"
         One of ``geokmeans.ALGORITHMS``: ``"geo"``, ``"lloyd"``, ``"elkan"``,
         ``"hamerly"``, ``"annulus"``, ``"exponion"``, ``"ball"``.
+    init : {'random', ndarray, path}, default='random'
+        Method for initialization:
+        - 'random': random selection from data points (default)
+        - ndarray of shape (n_clusters, n_features): explicit initial centroids
+        - path to a CSV file of ``n_clusters`` rows by ``n_features`` columns.
+          The file is read by the C++ routine directly, so timing a ``fit``
+          against pre-computed centroids does not include serialising them.
     max_iter : int, default=300
         Maximum number of iterations.
     tol : float, default=1e-4
         Convergence threshold on centroid movement between iterations.
     random_state : int or None, default=None
         Seed for centroid initialisation. ``None`` draws a fresh random seed.
+        Ignored when ``init`` is an ndarray.
     verbose : bool, default=False
         If True, stream the C++ routine's progress messages to stdout.
 
@@ -74,6 +83,7 @@ class GeoKMeans:
         n_clusters: int = 8,
         *,
         algorithm: str = "geo",
+        init: Union[str, os.PathLike, np.ndarray, None] = "random",
         max_iter: int = 300,
         tol: float = 1e-4,
         random_state: Optional[int] = None,
@@ -81,6 +91,7 @@ class GeoKMeans:
     ) -> None:
         self.n_clusters = n_clusters
         self.algorithm = algorithm
+        self.init = init
         self.max_iter = max_iter
         self.tol = tol
         self.random_state = random_state
@@ -126,6 +137,31 @@ class GeoKMeans:
                 f"{n_samples}]"
             )
 
+        # Resolve init into what _core.run expects: None for random sampling,
+        # an (k x d) array, or a path string the C++ reader opens itself.
+        init_centroids = None
+        if isinstance(self.init, np.ndarray):
+            init_centroids = self._check_array(self.init)
+            if init_centroids.shape != (self.n_clusters, X.shape[1]):
+                raise ValueError(
+                    f"init array must have shape ({self.n_clusters}, {X.shape[1]}), "
+                    f"got {init_centroids.shape}"
+                )
+        elif isinstance(self.init, os.PathLike):
+            init_centroids = os.fspath(self.init)
+        elif isinstance(self.init, str) and self.init != "random":
+            if not os.path.exists(self.init):
+                raise ValueError(
+                    f"init must be 'random', an ndarray, or a path to an existing "
+                    f"CSV file; got {self.init!r}, which does not exist"
+                )
+            init_centroids = self.init
+        elif self.init is not None and self.init != "random":
+            raise ValueError(
+                f"init must be 'random', an ndarray, a path, or None; "
+                f"got {self.init!r}"
+            )
+
         result = _core.run(
             algorithm=self._resolve_algorithm(),
             data=X,
@@ -134,6 +170,7 @@ class GeoKMeans:
             num_iterations=int(self.max_iter),
             seed=self._resolve_seed(),
             verbose=bool(self.verbose),
+            init=init_centroids,
         )
 
         self.cluster_centers_ = np.asarray(result["centroids"], dtype=np.float64)
@@ -156,8 +193,9 @@ class GeoKMeans:
         return self.fit(X).labels_
 
     def __repr__(self) -> str:
+        init_repr = "array" if isinstance(self.init, np.ndarray) else str(self.init)
         return (
             f"GeoKMeans(n_clusters={self.n_clusters}, algorithm={self.algorithm!r}, "
-            f"max_iter={self.max_iter}, tol={self.tol}, "
+            f"init={init_repr!r}, max_iter={self.max_iter}, tol={self.tol}, "
             f"random_state={self.random_state})"
         )

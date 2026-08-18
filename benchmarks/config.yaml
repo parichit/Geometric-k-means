@@ -1,0 +1,75 @@
+# Benchmark configuration for geokmeans JMLR MLOSS paper
+# Edit this file to change datasets, algorithms, k values, or outputs
+
+datasets:
+  - name: sensor
+    path: data/sensor.csv
+  - name: twitter
+    path: data/twitter.csv
+
+k_values: [5, 10, 15]
+
+
+implementations:
+
+  # geokmeans algorithms (excluding Elkan per user request).
+  # lloyd must stay in this list: it is the E1 reference and a Table 1 row.
+  geokmeans:
+    - lloyd
+    - hamerly
+    - annulus
+    - exponion
+    - geo
+
+controls:
+  threads: 1
+  trials_per_config: 5      # E2: timed trials per (dataset, algorithm, k)
+  warmup_trials: 1          # untimed fits before timing, to settle caches
+  aggregate: median         # median only; no IQR
+  tol: 1.0e-4
+  max_iter: 300
+  sse_reference: geokmeans_lloyd
+
+exactness_check:
+  k_values: [5, 10, 15]
+  seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  # E1: 10 seeds
+  # Reference implementation that every other algorithm is compared against.
+  reference: geokmeans_lloyd
+
+outputs:
+  # Table columns are the single source of truth for which metrics are
+  # reported. peak_rss_mb is deliberately absent: it is not measured.
+  - id: table1_main
+    type: latex_table
+    dataset: sensor          # Representative dataset
+    k: 10                    # Representative k
+    columns:
+      - wall_clock_seconds
+      - n_distance_calculations
+      - sse_ratio_vs_lloyd
+      - n_iterations
+    rows:
+      - geokmeans_lloyd
+      - geokmeans_hamerly
+      - geokmeans_annulus
+      - geokmeans_exponion
+      - geokmeans_geo
+    output_path: results/tables/table1_main.tex
+
+  - id: appendix_full_matrix
+    type: latex_table
+    datasets: all
+    k_values: all
+    columns:
+      - wall_clock_seconds
+      - n_distance_calculations
+      - sse_ratio_vs_lloyd
+      - n_iterations
+    output_path: results/tables/appendix_matrix.tex
+
+  - id: exactness_report
+    type: markdown_report
+    contents:
+      - ari_vs_lloyd
+      - max_relative_sse_deviation
+    output_path: results/reports/exactness_report.md
