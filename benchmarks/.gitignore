@@ -1,3 +1,5 @@
 inits/
 results/
 .venv/
+data/
+*.csv
