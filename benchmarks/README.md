@@ -14,7 +14,10 @@ below.
   **mean ± std** of iterations, runtime and SSE ratio.
 - **E2 (Comparison):** measures distance computations, iterations, wall-clock
   time and solution quality across the five algorithms.
-- **E3 (Energy):** not implemented — RAPL access requires root
+- **E3/E4/E5 (twitter, Figure 1):** Geometric-k-means vs scikit-learn Lloyd vs
+  R's default `stats::kmeans` (Hartigan-Wong) — distance computations, runtime
+  and **total RAPL energy** per fit. This is the figure the paper reports; see
+  [BENCHMARKING_GUIDE.md](BENCHMARKING_GUIDE.md).
 
 ## Quick Start
 
@@ -97,18 +100,19 @@ are the plotting input -- one row per (dataset, algorithm, k) with
 .venv/bin/python scripts/plot_results.py
 ```
 
-Writes a single figure to `results/figures/benchmark_summary.{png,pdf}` with
-five panels -- three on the top row (sensor), two centred beneath (twitter):
+`plot_results.py` writes Figure 1 to
+`results/figures/benchmark_summary.{png,pdf}` -- three panels on twitter, all
+with `k` on the x-axis, comparing Geometric-k-means, scikit-learn Lloyd and R
+`stats::kmeans`:
 
-- **(a)** table of SSE at convergence per algorithm and `k`
-- **(b)** mean distance computations vs `k`, log scale
-- **(c)** mean runtime vs `k`
-- **(d)** mean runtime vs `k` -- Geometric vs scikit-learn Lloyd
-- **(e)** mean distance computations vs `k`, log scale -- same pair
+- **(a)** mean distance computations vs `k`, log scale
+- **(b)** mean runtime vs `k`
+- **(c)** mean total energy vs `k`, grouped bars
 
-Lines carry std error bars. Panels (d-e) are omitted automatically if the E3
-summary CSV is absent, so the figure still builds from E1/E2 alone. Nothing is
-recomputed -- the script only reads the summary CSVs.
+Lines and bars carry std error bars. Panel (c) falls back to a placeholder if
+the run carries no energy data. The E1/E2 sensor panels now live in
+`scripts/plot_e1e2.py`. Nothing is recomputed -- the scripts only read the
+summary CSVs.
 
 ## Configuration
 
@@ -214,9 +218,12 @@ benchmarks/
 │   ├── utils.py             # Timing, SSE, dataset loading
 │   ├── run.py               # Experiment runner (E1, E2)
 │   ├── report.py            # Tables, reports, tidy mean/std CSVs
-│   ├── plot_results.py      # Single summary figure (5 panels)
+│   ├── plot_results.py      # Figure 1: twitter, 3 panels
+│   ├── plot_e1e2.py         # E1/E2 sensor figure (3 panels)
 │   ├── make_inits.py        # Pre-stage shared k-means++ centroids
-│   ├── bench_twitter.py     # E3: Geometric vs scikit-learn Lloyd
+│   ├── bench_twitter.py     # E3/E4/E5: geo vs scikit-learn vs R, + energy
+│   ├── run_r_kmeans.R       # One timed stats::kmeans fit, driven by the above
+│   ├── energy.py            # RAPL meter (Linux powercap); --check to verify
 │   ├── geo_blas.py          # BLAS-vectorised geo (validated reference impl)
 │   ├── bench_elkan.py       # Standalone: scikit-learn Elkan vs Geometric
 │   ├── bench_blas.py        # Standalone: scikit-learn Lloyd vs geo_blas
@@ -227,8 +234,12 @@ benchmarks/
     ├── raw/                 # per-trial CSVs + e2_summary.csv
     ├── tables/              # LaTeX
     ├── reports/             # markdown + tidy mean/std CSVs
-    └── figures/             # benchmark_summary.{png,pdf}
+    └── figures/             # benchmark_summary.{png,pdf}, e1e2_sensor.{png,pdf}
 ```
+
+Documentation: [BENCHMARKING_GUIDE.md](BENCHMARKING_GUIDE.md) covers Figure 1
+end to end; [docs/E1_E2_SENSOR.md](docs/E1_E2_SENSOR.md) covers the older
+sensor experiments.
 
 ## Troubleshooting
 

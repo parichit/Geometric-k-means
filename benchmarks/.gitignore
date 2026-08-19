@@ -3,3 +3,9 @@ results/
 .venv/
 data/
 *.csv
+logs/
+
+# Raw float64 handover blob written for the R runner. It always lands under
+# results/ (tempfile.mkdtemp) and is deleted when the sweep exits, but it is
+# hundreds of MB on twitter, so ignore the extension outright as well.
+*.f64
