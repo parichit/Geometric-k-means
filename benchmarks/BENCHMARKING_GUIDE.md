@@ -165,6 +165,18 @@ Distance counts, iteration counts and SSE are deterministic and unaffected.
 
 Reads only the tidy summary and recomputes nothing.
 
+Plotting is seaborn-based (`seaborn>=0.13`, listed in `requirements.txt`). A
+virtualenv created before that entry existed needs it added:
+
+```bash
+.venv/bin/pip install 'seaborn>=0.13'
+```
+
+Everything cosmetic — panel titles, axis labels, font sizes, figure size, DPI,
+colours, markers, spacing, the footnotes — lives in the `CONFIGURATION` block
+at the top of `scripts/plot_results.py`; edit there and nothing below it.
+`scripts/plot_e1e2.py` carries the same block for the E1/E2 figure.
+
 ```
 benchmarks/results/
 ├── raw/e3_twitter.csv                    # per-trial, every column
