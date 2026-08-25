@@ -15,7 +15,9 @@ Root stays canonical; the vendored copy is a build artifact.
 """
 from __future__ import annotations
 
+import os
 import shutil
+import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent          # geokmeans-py/
@@ -29,6 +31,43 @@ DEST = HERE / "src" / "geokmeans" / "_cpp"       # vendored destination
 RENAME = {"ball_kmeans++_xf.hpp": "ball_kmeans_xf.hpp"}
 
 
+def clear_dest(dest: Path) -> None:
+    """Remove the vendored tree, tolerating NFS silly-rename files.
+
+    On a network filesystem -- this repo is often built on /nobackup or a
+    similar cluster scratch mount -- deleting a file another process still
+    holds open does not unlink it. NFS renames it to .nfsXXXXXXXX and keeps it
+    alive, so rmtree empties a directory, calls rmdir, and finds that file
+    sitting in it: OSError 39, "Directory not empty".
+
+    Retrying wins once the holder exits. If it does not, renaming the tree
+    aside always works -- rename has no such restriction -- so the build can
+    proceed regardless and the leftovers are reported rather than silently
+    left behind.
+    """
+    for attempt in range(3):
+        try:
+            shutil.rmtree(dest)
+            return
+        except FileNotFoundError:
+            return
+        except OSError as exc:
+            if attempt == 2:
+                break
+            print(f"  {dest.name}: {exc.strerror}; retrying in 1s "
+                  f"(NFS may still be holding a deleted file open)")
+            time.sleep(1.0)
+
+    stale = dest.with_name(f"{dest.name}.stale.{os.getpid()}")
+    dest.rename(stale)
+    print(f"  could not delete {dest.name}; moved it aside as {stale.name}")
+    shutil.rmtree(stale, ignore_errors=True)
+    if stale.exists():
+        print(f"  NOTE: {stale} is still on disk because something holds a "
+              f"file in it open.\n        Find it with: lsof +D {stale}\n"
+              f"        Then: rm -rf {stale}")
+
+
 def main() -> None:
     if not SRC.is_dir():
         raise SystemExit(f"Cannot find canonical C++ sources at {SRC}")
@@ -36,7 +75,7 @@ def main() -> None:
         raise SystemExit(f"Cannot find bundled Eigen at {EIGEN}")
 
     if DEST.exists():
-        shutil.rmtree(DEST)
+        clear_dest(DEST)
     DEST.mkdir(parents=True)
 
     # 1. Copy every header from the root C++ library.

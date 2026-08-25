@@ -153,8 +153,39 @@ class RRunner:
                         OPENBLAS_NUM_THREADS="1", R_ENABLE_JIT="3")
 
     @staticmethod
-    def available():
-        return shutil.which("Rscript") is not None
+    def preflight():
+        """Prove R actually launches, before any expensive work happens.
+
+        shutil.which() only proves the `Rscript` wrapper is on PATH. On a
+        cluster the wrapper routinely survives while the interpreter behind it
+        does not -- an R built against one ICU/readline/gfortran and running
+        against another fails at the dynamic-loader stage. Catching that here
+        costs 200 ms; catching it at the first fit costs the k-means++
+        pre-staging and a multi-hundred-megabyte blob write first.
+
+        Returns the R version string, or raises SystemExit quoting R's own
+        stderr, which names the missing library.
+        """
+        if shutil.which("Rscript") is None:
+            raise SystemExit(
+                "Rscript not found on PATH. Install R, or drop R from the "
+                "sweep with --impls geo sklearn")
+        try:
+            proc = subprocess.run(
+                ["Rscript", "--vanilla", "-e", "cat(R.version.string)"],
+                capture_output=True, text=True, timeout=120)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise SystemExit(f"Rscript could not be launched: {exc}")
+        if proc.returncode != 0:
+            raise SystemExit(
+                f"Rscript is on PATH but fails to start (exit "
+                f"{proc.returncode}):\n\n{proc.stderr.strip()}\n\n"
+                f"A 'cannot open shared object file' here means this R was "
+                f"built against libraries the current environment does not "
+                f"provide. Load the module or conda env R was built under, or "
+                f"point LD_LIBRARY_PATH at the directory holding that library."
+                f"\nTo proceed without R: --impls geo sklearn")
+        return proc.stdout.strip()
 
     def run(self, k, seed, init_path):
         out = self.dir / f"r_k{k}_seed{seed}.kv"
@@ -251,6 +282,10 @@ def main():
         return energy_mod.EnergyMeter() if measure_energy \
             else energy_mod.EnergyMeter(domains=[])
 
+    # --- R, checked up front so a broken install costs seconds, not hours ---
+    if "r" in args.impls:
+        print(f"R: {RRunner.preflight()}")
+
     # --- data --------------------------------------------------------------
     X = load_dataset({"name": args.dataset, "path": args.path}, base / "data")
     if args.subsample:
@@ -266,9 +301,6 @@ def main():
     # --- R --------------------------------------------------------------
     r_runner, r_tmp = None, None
     if "r" in args.impls:
-        if not RRunner.available():
-            raise SystemExit("Rscript not found on PATH. Install R, or drop "
-                             "R from the sweep with --impls geo sklearn")
         r_tmp = tempfile.mkdtemp(prefix="rbench_",
                                  dir=str(base / "results"))
         with Timer() as t:

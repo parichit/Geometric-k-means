@@ -267,6 +267,25 @@ shadowing the install. Run from `benchmarks/`, not the repo root.
 **"Rscript not found on PATH"** — install R, or drop it from the sweep with
 `--impls geo sklearn`.
 
+**R fails to start: `error while loading shared libraries: lib*.so`** — the R
+on `PATH` was built against libraries this environment no longer provides.
+Common on a cluster after a module or conda change. `ldd $(command -v R)`-style
+diagnosis aside, the durable fix without root is to build your own:
+
+```bash
+scripts/install_r_local.sh --prefix /nobackup/$USER/r-local
+source /nobackup/$USER/r-local/env.sh
+```
+
+It probes for R's dependencies, builds only the missing ones, and links
+everything with an RPATH into the prefix — so the resulting R resolves its own
+libraries and keeps working inside `nohup`/batch shells that never read your
+profile. Re-running is safe; each component is stamped and skipped. Only base R
+is needed, so the defaults (no X11, no Tcl/Tk, no readline, no ICU) are fine.
+It deliberately does **not** use `--enable-R-shlib` or an external threaded
+BLAS: the first costs a few percent on every call and the second would
+reintroduce parallelism the benchmark's single-thread control assumes away.
+
 **"--energy requested but RAPL is unusable"** — run
 `python scripts/energy.py --check` and follow the fix it prints.
 
